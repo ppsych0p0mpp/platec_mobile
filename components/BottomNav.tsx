@@ -55,7 +55,7 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800 safe-area-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -63,7 +63,7 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-full h-full transition-all duration-200 ${
+              className={`relative flex flex-col items-center justify-center w-full h-full transition-all duration-200 ${
                 isActive
                   ? 'text-violet-400'
                   : 'text-slate-500 active:text-slate-300'
@@ -82,6 +82,8 @@ export default function BottomNav() {
           );
         })}
       </div>
+      {/* Safe area spacer for iOS home indicator */}
+      <div className="h-[env(safe-area-inset-bottom)]" />
     </nav>
   );
 }
