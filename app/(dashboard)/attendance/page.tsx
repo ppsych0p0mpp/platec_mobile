@@ -1,22 +1,16 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Card, CardHeader, CardTitle, CardContent, Badge, Button } from '@/components/ui';
-
-interface ClassInfo {
-  id: string;
-  name: string;
-  code: string;
-  subject: string | null;
-}
+import { useEffect, useState } from 'react';
+import { api } from '@/lib/api';
+import MobileHeader from '@/components/MobileHeader';
 
 interface AttendanceRecord {
-  _id: string;
+  id: string;
   date: string;
   status: 'present' | 'absent' | 'late';
-  remarks: string | null;
-  classId: string | null;
-  class: ClassInfo | null;
+  remarks?: string;
+  class_name?: string;
+  class_code?: string;
 }
 
 interface AttendanceStats {
@@ -26,209 +20,185 @@ interface AttendanceStats {
   total: number;
 }
 
-interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  pages: number;
-}
-
 export default function AttendancePage() {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [stats, setStats] = useState<AttendanceStats>({ present: 0, absent: 0, late: 0, total: 0 });
-  const [pagination, setPagination] = useState<Pagination>({
-    page: 1,
-    limit: 20,
-    total: 0,
-    pages: 0,
-  });
   const [isLoading, setIsLoading] = useState(true);
-
-  const fetchRecords = useCallback(async (page: number) => {
-    setIsLoading(true);
-    try {
-      const token = localStorage.getItem('student_token');
-      const response = await fetch(`/api/student/attendance?page=${page}&limit=20`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch');
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        setRecords(data.records || []);
-        setStats(data.stats);
-        setPagination(data.pagination);
-      }
-    } catch (error) {
-      console.error('Failed to fetch records:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const [filter, setFilter] = useState<'all' | 'present' | 'absent' | 'late'>('all');
 
   useEffect(() => {
-    fetchRecords(1);
-  }, [fetchRecords]);
+    async function fetchAttendance() {
+      try {
+        const response = await api.get<{
+          success: boolean;
+          records: AttendanceRecord[];
+          stats: AttendanceStats;
+        }>('/student/attendance?limit=100');
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+        if (response.success && response.data) {
+          setRecords(response.data.records || []);
+          setStats(response.data.stats || { present: 0, absent: 0, late: 0, total: 0 });
+        }
+      } catch (error) {
+        console.error('Failed to fetch attendance:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchAttendance();
+  }, []);
+
+  const filteredRecords = filter === 'all' 
+    ? records 
+    : records.filter(r => r.status === filter);
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
     return {
-      day: date.toLocaleDateString('en-US', { weekday: 'long' }),
-      date: date.toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      }),
+      day: date.getDate(),
+      month: date.toLocaleDateString('en-US', { month: 'short' }),
+      weekday: date.toLocaleDateString('en-US', { weekday: 'short' }),
     };
   };
 
-  const getStatusStyles = (status: 'present' | 'absent' | 'late') => {
-    const styles = {
-      present: { bg: 'bg-emerald-500/20', border: 'border-emerald-500', icon: '✓', color: 'text-emerald-400' },
-      absent: { bg: 'bg-rose-500/20', border: 'border-rose-500', icon: '✕', color: 'text-rose-400' },
-      late: { bg: 'bg-amber-500/20', border: 'border-amber-500', icon: '⏱', color: 'text-amber-400' },
-    };
-    return styles[status];
+  const getStatusStyles = (status: string) => {
+    switch (status) {
+      case 'present': return { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' };
+      case 'absent': return { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20' };
+      case 'late': return { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' };
+      default: return { bg: 'bg-slate-500/10', text: 'text-slate-400', border: 'border-slate-500/20' };
+    }
   };
 
-  const attendanceRate = stats.total > 0
-    ? (((stats.present + stats.late) / stats.total) * 100).toFixed(1)
-    : '0';
+  const attendanceRate = stats.total ? Math.round((stats.present / stats.total) * 100) : 0;
+
+  if (isLoading) {
+    return (
+      <div className="px-5 pt-12 safe-area-top">
+        <div className="h-10 w-40 skeleton rounded-lg mb-6" />
+        <div className="h-24 skeleton rounded-2xl mb-6" />
+        <div className="flex gap-2 mb-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-10 w-20 skeleton rounded-full" />
+          ))}
+        </div>
+        <div className="space-y-3">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-20 skeleton rounded-2xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="animate-fade-in">
-        <h1 className="text-3xl font-bold text-white">Attendance History</h1>
-        <p className="text-slate-400 mt-1">{pagination.total} total records across all classes</p>
-      </div>
+    <div className="hide-scrollbar">
+      <MobileHeader title="Attendance" />
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in stagger-1" style={{ opacity: 0 }}>
-        <Card className="text-center">
-          <CardContent className="py-4">
-            <p className="text-3xl font-bold text-violet-400">{attendanceRate}%</p>
-            <p className="text-sm text-slate-500">Attendance Rate</p>
-          </CardContent>
-        </Card>
-        <Card className="text-center">
-          <CardContent className="py-4">
-            <p className="text-3xl font-bold text-emerald-400">{stats.present}</p>
-            <p className="text-sm text-slate-500">Present</p>
-          </CardContent>
-        </Card>
-        <Card className="text-center">
-          <CardContent className="py-4">
-            <p className="text-3xl font-bold text-rose-400">{stats.absent}</p>
-            <p className="text-sm text-slate-500">Absent</p>
-          </CardContent>
-        </Card>
-        <Card className="text-center">
-          <CardContent className="py-4">
-            <p className="text-3xl font-bold text-amber-400">{stats.late}</p>
-            <p className="text-sm text-slate-500">Late</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Records */}
-      <Card variant="gradient" className="animate-fade-in stagger-2" style={{ opacity: 0 }}>
-        <CardHeader>
-          <CardTitle>All Records</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
+      <div className="px-5 space-y-5 pb-6">
+        {/* Summary Card */}
+        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/50 animate-fade-in">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-slate-400 text-sm">Attendance Rate</p>
+              <p className="text-3xl font-bold text-white">{attendanceRate}%</p>
             </div>
-          ) : records.length > 0 ? (
-            <>
-              <div className="space-y-3">
-                {records.map((record) => {
-                  const { day, date } = formatDate(record.date);
-                  const statusStyle = getStatusStyles(record.status);
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+              attendanceRate >= 80 ? 'bg-emerald-500/20' : attendanceRate >= 60 ? 'bg-amber-500/20' : 'bg-red-500/20'
+            }`}>
+              <span className={`text-2xl font-bold ${
+                attendanceRate >= 80 ? 'text-emerald-400' : attendanceRate >= 60 ? 'text-amber-400' : 'text-red-400'
+              }`}>
+                {attendanceRate >= 80 ? '👍' : attendanceRate >= 60 ? '⚠️' : '⚠️'}
+              </span>
+            </div>
+          </div>
+          <div className="flex gap-4 text-sm">
+            <span className="text-emerald-400">{stats.present} Present</span>
+            <span className="text-slate-600">•</span>
+            <span className="text-red-400">{stats.absent} Absent</span>
+            <span className="text-slate-600">•</span>
+            <span className="text-amber-400">{stats.late} Late</span>
+          </div>
+        </div>
 
-                  return (
-                    <div
-                      key={record._id}
-                      className="flex items-center justify-between p-4 rounded-xl bg-slate-800/50 border border-slate-700 hover:border-slate-600 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl ${statusStyle.bg} border ${statusStyle.border} flex items-center justify-center`}>
-                          <span className={`text-lg ${statusStyle.color}`}>{statusStyle.icon}</span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-white">{day}</p>
-                          <p className="text-sm text-slate-400">{date}</p>
-                          {record.class && (
-                            <p className="text-xs text-violet-400 mt-1">
-                              {record.class.name} ({record.class.code})
-                            </p>
-                          )}
-                          {record.remarks && (
-                            <p className="text-xs text-slate-500 mt-1 italic">{record.remarks}</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <Badge
-                          variant={
-                            record.status === 'present' ? 'success' :
-                            record.status === 'absent' ? 'danger' : 'warning'
-                          }
-                        >
-                          {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
-                        </Badge>
-                        {record.class?.subject && (
-                          <span className="text-xs text-slate-500">{record.class.subject}</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+        {/* Filter Tabs */}
+        <div className="flex gap-2 overflow-x-auto hide-scrollbar animate-fade-in stagger-1">
+          {(['all', 'present', 'absent', 'late'] as const).map((status) => (
+            <button
+              key={status}
+              onClick={() => setFilter(status)}
+              className={`px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all touch-feedback ${
+                filter === status
+                  ? 'bg-violet-600 text-white'
+                  : 'bg-slate-900/60 text-slate-400 border border-slate-800'
+              }`}
+            >
+              {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+              {status !== 'all' && (
+                <span className="ml-1.5 opacity-70">
+                  ({status === 'present' ? stats.present : status === 'absent' ? stats.absent : stats.late})
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
 
-              {/* Pagination */}
-              {pagination.pages > 1 && (
-                <div className="flex items-center justify-between mt-6 pt-6 border-t border-slate-800">
-                  <p className="text-sm text-slate-500">
-                    Page {pagination.page} of {pagination.pages}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      disabled={pagination.page === 1}
-                      onClick={() => fetchRecords(pagination.page - 1)}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      disabled={pagination.page === pagination.pages}
-                      onClick={() => fetchRecords(pagination.page + 1)}
-                    >
-                      Next
-                    </Button>
+        {/* Records List */}
+        <div className="space-y-3 animate-fade-in stagger-2">
+          {filteredRecords.length > 0 ? (
+            filteredRecords.map((record) => {
+              const date = formatDate(record.date);
+              const styles = getStatusStyles(record.status);
+              
+              return (
+                <div
+                  key={record.id}
+                  className={`flex items-center gap-4 p-4 rounded-2xl bg-slate-900/60 border ${styles.border}`}
+                >
+                  {/* Date */}
+                  <div className="text-center min-w-[50px]">
+                    <p className="text-2xl font-bold text-white">{date.day}</p>
+                    <p className="text-xs text-slate-500">{date.month}</p>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="w-px h-12 bg-slate-800" />
+
+                  {/* Details */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-white truncate">
+                      {record.class_name || 'Class Session'}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      {date.weekday}
+                      {record.class_code && ` • ${record.class_code}`}
+                    </p>
+                    {record.remarks && (
+                      <p className="text-xs text-slate-500 mt-1 truncate">{record.remarks}</p>
+                    )}
+                  </div>
+
+                  {/* Status Badge */}
+                  <div className={`px-3 py-1.5 rounded-full ${styles.bg}`}>
+                    <span className={`text-xs font-semibold capitalize ${styles.text}`}>
+                      {record.status}
+                    </span>
                   </div>
                 </div>
-              )}
-            </>
+              );
+            })
           ) : (
-            <div className="text-center py-12">
-              <svg className="w-16 h-16 mx-auto text-slate-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="text-center py-12 rounded-2xl bg-slate-900/40 border border-slate-800/50">
+              <svg className="w-16 h-16 mx-auto text-slate-700 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              <p className="text-slate-500">No attendance records yet</p>
-              <p className="text-slate-600 text-sm mt-1">Join a class and your attendance will appear here</p>
+              <p className="text-slate-500">No {filter === 'all' ? '' : filter + ' '}records found</p>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

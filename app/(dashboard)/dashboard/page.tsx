@@ -1,272 +1,248 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth';
-import { Card, CardHeader, CardTitle, CardContent, Badge } from '@/components/ui';
+import { api } from '@/lib/api';
+import MobileHeader from '@/components/MobileHeader';
 
 interface ClassInfo {
   id: string;
   name: string;
   code: string;
   subject: string | null;
+  schedule: string | null;
 }
 
 interface AttendanceRecord {
-  _id: string;
+  id: string;
   date: string;
   status: 'present' | 'absent' | 'late';
-  class: ClassInfo | null;
+  class_name?: string;
+  class_code?: string;
 }
 
-interface AttendanceStats {
-  present: number;
-  absent: number;
-  late: number;
-  total: number;
-}
-
-interface EnrolledClass {
-  id: string;
-  name: string;
-  code: string;
-  subject: string | null;
-  teacher?: { name: string };
+interface DashboardData {
+  myClasses: ClassInfo[];
+  recentAttendance: AttendanceRecord[];
+  stats: {
+    present: number;
+    absent: number;
+    late: number;
+    total: number;
+  };
 }
 
 export default function DashboardPage() {
   const { student } = useAuth();
-  const [stats, setStats] = useState<AttendanceStats>({ present: 0, absent: 0, late: 0, total: 0 });
-  const [recentRecords, setRecentRecords] = useState<AttendanceRecord[]>([]);
-  const [enrolledClasses, setEnrolledClasses] = useState<EnrolledClass[]>([]);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchData = useCallback(async () => {
-    try {
-      const token = localStorage.getItem('student_token');
-      
-      // Fetch attendance
-      const attendanceRes = await fetch('/api/student/attendance?limit=5', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const attendanceData = await attendanceRes.json();
-      
-      if (attendanceData.success) {
-        setStats(attendanceData.stats);
-        setRecentRecords(attendanceData.records || []);
-      }
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [classesRes, attendanceRes] = await Promise.all([
+          api.get<{ success: boolean; classes: ClassInfo[] }>('/student/classes'),
+          api.get<{ success: boolean; records: AttendanceRecord[]; stats: DashboardData['stats'] }>('/student/attendance?limit=5'),
+        ]);
 
-      // Fetch enrolled classes
-      const classesRes = await fetch('/api/student/classes', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const classesData = await classesRes.json();
-      
-      if (classesData.success) {
-        setEnrolledClasses(classesData.classes || []);
+        setData({
+          myClasses: classesRes.data?.classes || [],
+          recentAttendance: attendanceRes.data?.records || [],
+          stats: attendanceRes.data?.stats || { present: 0, absent: 0, late: 0, total: 0 },
+        });
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-    } finally {
-      setIsLoading(false);
     }
+
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  const attendanceRate = data?.stats.total 
+    ? Math.round((data.stats.present / data.stats.total) * 100) 
+    : 0;
 
-  const attendanceRate = stats.total > 0
-    ? (((stats.present + stats.late) / stats.total) * 100).toFixed(1)
-    : '0';
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    });
+    if (date.toDateString() === today.toDateString()) return 'Today';
+    if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  const getStatusBadge = (status: 'present' | 'absent' | 'late') => {
-    const variants = {
-      present: 'success' as const,
-      absent: 'danger' as const,
-      late: 'warning' as const,
-    };
-    return variants[status];
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'present': return 'text-emerald-400 bg-emerald-500/10';
+      case 'absent': return 'text-red-400 bg-red-500/10';
+      case 'late': return 'text-amber-400 bg-amber-500/10';
+      default: return 'text-slate-400 bg-slate-500/10';
+    }
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
+      <div className="px-5 pt-12 safe-area-top">
+        <div className="h-8 w-32 skeleton rounded-lg mb-2" />
+        <div className="h-10 w-48 skeleton rounded-lg mb-8" />
+        <div className="h-40 skeleton rounded-3xl mb-6" />
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-24 skeleton rounded-2xl" />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="animate-fade-in">
-        <h1 className="text-3xl font-bold text-white">
-          Hello, {student?.name?.split(' ')[0] || 'Student'} 👋
-        </h1>
-        <p className="text-slate-400 mt-1">
-          {student?.course} - Year {student?.year} Section {student?.section}
-        </p>
-      </div>
+    <div className="hide-scrollbar">
+      <MobileHeader showGreeting />
 
-      {/* Enrolled Classes Count */}
-      <Card variant="gradient" className="animate-fade-in stagger-1 relative overflow-hidden" style={{ opacity: 0 }}>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/10 rounded-full blur-3xl" />
-        <div className="relative flex items-center justify-between">
-          <div>
-            <p className="text-slate-400 text-sm font-medium">Enrolled Classes</p>
-            <p className="text-5xl font-bold text-violet-400 mt-2">{enrolledClasses.length}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-slate-400 text-sm">Total Attendance Records</p>
-            <p className="text-2xl font-bold text-white">{stats.total}</p>
+      <div className="px-5 space-y-6 pb-6">
+        {/* Attendance Rate Card */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 to-indigo-700 p-6 animate-fade-in">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+          
+          <div className="relative">
+            <p className="text-violet-200 text-sm font-medium mb-1">Overall Attendance</p>
+            <div className="flex items-end gap-2 mb-4">
+              <span className="text-5xl font-bold text-white">{attendanceRate}</span>
+              <span className="text-2xl text-violet-200 mb-1">%</span>
+            </div>
+            
+            {/* Progress bar */}
+            <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-white rounded-full transition-all duration-1000 ease-out"
+                style={{ width: `${attendanceRate}%` }}
+              />
+            </div>
+            
+            <p className="text-violet-200 text-sm mt-3">
+              {data?.stats.present || 0} present out of {data?.stats.total || 0} classes
+            </p>
           </div>
         </div>
-      </Card>
 
-      {/* Attendance Rate Card */}
-      <Card variant="gradient" className="animate-fade-in stagger-2 relative overflow-hidden" style={{ opacity: 0 }}>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl" />
-        <div className="relative">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-slate-400 text-sm font-medium">Overall Attendance Rate</p>
-              <p className="text-5xl font-bold text-violet-400 mt-2">{attendanceRate}%</p>
-            </div>
-            <Badge variant={parseFloat(attendanceRate) >= 80 ? 'success' : 'warning'}>
-              {parseFloat(attendanceRate) >= 80 ? 'Good Standing' : 'Needs Improvement'}
-            </Badge>
+        {/* Quick Stats */}
+        <div className="grid grid-cols-3 gap-3 animate-fade-in stagger-1">
+          <div className="stat-present rounded-2xl p-4 text-center">
+            <p className="text-2xl font-bold text-emerald-400">{data?.stats.present || 0}</p>
+            <p className="text-xs text-slate-400 mt-1">Present</p>
           </div>
-          <div className="h-3 bg-slate-800 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full transition-all duration-500"
-              style={{ width: `${Math.min(parseFloat(attendanceRate), 100)}%` }}
-            />
+          <div className="stat-absent rounded-2xl p-4 text-center">
+            <p className="text-2xl font-bold text-red-400">{data?.stats.absent || 0}</p>
+            <p className="text-xs text-slate-400 mt-1">Absent</p>
+          </div>
+          <div className="stat-late rounded-2xl p-4 text-center">
+            <p className="text-2xl font-bold text-amber-400">{data?.stats.late || 0}</p>
+            <p className="text-xs text-slate-400 mt-1">Late</p>
           </div>
         </div>
-      </Card>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="animate-fade-in stagger-3" style={{ opacity: 0 }}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-400 text-sm">Present</p>
-              <p className="text-3xl font-bold text-emerald-400 mt-1">{stats.present}</p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-              <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="animate-fade-in stagger-4" style={{ opacity: 0 }}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-400 text-sm">Absent</p>
-              <p className="text-3xl font-bold text-rose-400 mt-1">{stats.absent}</p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-rose-500/20 flex items-center justify-center">
-              <svg className="w-6 h-6 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="animate-fade-in stagger-5" style={{ opacity: 0 }}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-slate-400 text-sm">Late</p>
-              <p className="text-3xl font-bold text-amber-400 mt-1">{stats.late}</p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center">
-              <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* My Classes */}
-      {enrolledClasses.length > 0 && (
-        <Card variant="gradient" className="animate-fade-in stagger-5" style={{ opacity: 0 }}>
-          <CardHeader>
-            <CardTitle>My Classes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {enrolledClasses.slice(0, 4).map((cls) => (
+        {/* My Classes */}
+        {data?.myClasses && data.myClasses.length > 0 && (
+          <div className="animate-fade-in stagger-2">
+            <h2 className="text-lg font-semibold text-white mb-3">My Classes</h2>
+            <div className="space-y-3">
+              {data.myClasses.slice(0, 3).map((cls) => (
                 <div
                   key={cls.id}
-                  className="p-4 rounded-xl bg-slate-800/50 border border-slate-700"
+                  className="flex items-center gap-4 p-4 rounded-2xl bg-slate-900/60 border border-slate-800/50"
                 >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-white">{cls.name}</p>
-                      <p className="text-sm text-slate-500">{cls.subject || 'No subject'}</p>
-                    </div>
-                    <code className="px-2 py-1 bg-violet-500/20 rounded text-violet-400 text-sm">
-                      {cls.code}
-                    </code>
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-bold text-lg">{cls.name.charAt(0)}</span>
                   </div>
-                  {cls.teacher && (
-                    <p className="text-xs text-slate-500 mt-2">Teacher: {cls.teacher.name}</p>
-                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-white truncate">{cls.name}</p>
+                    <p className="text-sm text-slate-400 truncate">
+                      {cls.subject || cls.schedule || `Code: ${cls.code}`}
+                    </p>
+                  </div>
+                  <code className="text-xs text-violet-400 bg-violet-500/10 px-2 py-1 rounded-lg flex-shrink-0">
+                    {cls.code}
+                  </code>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        )}
 
-      {/* Recent Attendance */}
-      <Card variant="gradient" className="animate-fade-in stagger-5" style={{ opacity: 0 }}>
-        <CardHeader>
-          <CardTitle>Recent Attendance</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {recentRecords.length > 0 ? (
-            <div className="space-y-3">
-              {recentRecords.map((record) => (
+        {/* Recent Attendance */}
+        <div className="animate-fade-in stagger-3">
+          <h2 className="text-lg font-semibold text-white mb-3">Recent Attendance</h2>
+          
+          {data?.recentAttendance && data.recentAttendance.length > 0 ? (
+            <div className="space-y-2">
+              {data.recentAttendance.map((record) => (
                 <div
-                  key={record._id}
-                  className="flex items-center justify-between p-4 rounded-xl bg-slate-800/50 border border-slate-700"
+                  key={record.id}
+                  className="flex items-center justify-between p-4 rounded-2xl bg-slate-900/60 border border-slate-800/50"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-3 h-3 rounded-full ${
-                      record.status === 'present' ? 'bg-emerald-500' :
-                      record.status === 'absent' ? 'bg-rose-500' : 'bg-amber-500'
-                    }`} />
-                    <div>
-                      <span className="text-white font-medium">{formatDate(record.date)}</span>
-                      {record.class && (
-                        <p className="text-xs text-violet-400">{record.class.name}</p>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${getStatusColor(record.status)}`}>
+                      {record.status === 'present' && (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                      {record.status === 'absent' && (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      )}
+                      {record.status === 'late' && (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
                       )}
                     </div>
+                    <div>
+                      <p className="font-medium text-white text-sm">
+                        {record.class_name || 'Class'}
+                      </p>
+                      <p className="text-xs text-slate-500">{formatDate(record.date)}</p>
+                    </div>
                   </div>
-                  <Badge variant={getStatusBadge(record.status)}>
-                    {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
-                  </Badge>
+                  <span className={`text-xs font-medium px-3 py-1.5 rounded-full capitalize ${getStatusColor(record.status)}`}>
+                    {record.status}
+                  </span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-center text-slate-500 py-8">No attendance records yet</p>
+            <div className="text-center py-8 rounded-2xl bg-slate-900/40 border border-slate-800/50">
+              <svg className="w-12 h-12 mx-auto text-slate-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <p className="text-slate-500 text-sm">No attendance records yet</p>
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Student Info */}
+        {student && (
+          <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-800/50 animate-fade-in stagger-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">{student.name.charAt(0)}</span>
+              </div>
+              <div>
+                <p className="font-medium text-white">{student.name}</p>
+                <p className="text-sm text-slate-400">
+                  {student.course} • Year {student.year} - {student.section}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
