@@ -155,14 +155,14 @@ export default function ClassesPage() {
 
       {/* Join Modal */}
       {showJoinModal && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm safe-area-bottom">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-5"
+          onClick={() => { setShowJoinModal(false); setJoinCode(''); setError(''); }}
+        >
           <div 
-            className="w-full max-w-lg bg-slate-900 rounded-t-3xl p-6 animate-slide-up"
+            className="w-full max-w-md bg-slate-900 rounded-3xl p-6 animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Handle */}
-            <div className="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-6" />
-
             <h2 className="text-xl font-bold text-white text-center mb-2">Join a Class</h2>
             <p className="text-slate-400 text-center text-sm mb-6">
               Enter the class code provided by your teacher
