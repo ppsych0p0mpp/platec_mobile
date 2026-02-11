@@ -16,15 +16,15 @@ export default function MobileHeader({ title, showGreeting = false }: MobileHead
     
     return (
       <header className="px-5 pt-12 pb-4 safe-area-top">
-        <p className="text-slate-400 text-sm">{greeting},</p>
-        <h1 className="text-2xl font-bold text-white mt-0.5">{student.name.split(' ')[0]} 👋</h1>
+        <p className="text-gray-500 text-sm">{greeting},</p>
+        <h1 className="text-2xl font-bold text-gray-900 mt-0.5">{student.name.split(' ')[0]} 👋</h1>
       </header>
     );
   }
 
   return (
     <header className="px-5 pt-12 pb-4 safe-area-top">
-      <h1 className="text-2xl font-bold text-white">{title}</h1>
+      <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
     </header>
   );
 }

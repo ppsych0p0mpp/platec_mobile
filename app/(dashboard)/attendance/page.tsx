@@ -64,10 +64,10 @@ export default function AttendancePage() {
 
   const getStatusStyles = (status: string) => {
     switch (status) {
-      case 'present': return { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20' };
-      case 'absent': return { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20' };
-      case 'late': return { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' };
-      default: return { bg: 'bg-slate-500/10', text: 'text-slate-400', border: 'border-slate-500/20' };
+      case 'present': return { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200' };
+      case 'absent': return { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200' };
+      case 'late': return { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-200' };
+      default: return { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200' };
     }
   };
 
@@ -98,28 +98,28 @@ export default function AttendancePage() {
 
       <div className="px-5 space-y-5 pb-6">
         {/* Summary Card */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/50 animate-fade-in">
+        <div className="p-5 rounded-2xl bg-gray-100 border border-gray-200 animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-slate-400 text-sm">Attendance Rate</p>
-              <p className="text-3xl font-bold text-white">{attendanceRate}%</p>
+              <p className="text-gray-600 text-sm">Attendance Rate</p>
+              <p className="text-3xl font-bold text-gray-900">{attendanceRate}%</p>
             </div>
             <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-              attendanceRate >= 80 ? 'bg-emerald-500/20' : attendanceRate >= 60 ? 'bg-amber-500/20' : 'bg-red-500/20'
+              attendanceRate >= 80 ? 'bg-emerald-100' : attendanceRate >= 60 ? 'bg-amber-100' : 'bg-red-100'
             }`}>
               <span className={`text-2xl font-bold ${
-                attendanceRate >= 80 ? 'text-emerald-400' : attendanceRate >= 60 ? 'text-amber-400' : 'text-red-400'
+                attendanceRate >= 80 ? 'text-emerald-600' : attendanceRate >= 60 ? 'text-amber-600' : 'text-red-600'
               }`}>
                 {attendanceRate >= 80 ? '👍' : attendanceRate >= 60 ? '⚠️' : '⚠️'}
               </span>
             </div>
           </div>
           <div className="flex gap-4 text-sm">
-            <span className="text-emerald-400">{stats.present} Present</span>
-            <span className="text-slate-600">•</span>
-            <span className="text-red-400">{stats.absent} Absent</span>
-            <span className="text-slate-600">•</span>
-            <span className="text-amber-400">{stats.late} Late</span>
+            <span className="text-emerald-600">{stats.present} Present</span>
+            <span className="text-gray-400">•</span>
+            <span className="text-red-600">{stats.absent} Absent</span>
+            <span className="text-gray-400">•</span>
+            <span className="text-amber-600">{stats.late} Late</span>
           </div>
         </div>
 
@@ -131,8 +131,8 @@ export default function AttendancePage() {
               onClick={() => setFilter(status)}
               className={`px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all touch-feedback ${
                 filter === status
-                  ? 'bg-violet-600 text-white'
-                  : 'bg-slate-900/60 text-slate-400 border border-slate-800'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-600 border border-gray-300'
               }`}
             >
               {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
@@ -155,28 +155,28 @@ export default function AttendancePage() {
               return (
                 <div
                   key={record.id}
-                  className={`flex items-center gap-4 p-4 rounded-2xl bg-slate-900/60 border ${styles.border}`}
+                  className={`flex items-center gap-4 p-4 rounded-2xl bg-gray-100 border ${styles.border}`}
                 >
                   {/* Date */}
                   <div className="text-center min-w-[50px]">
-                    <p className="text-2xl font-bold text-white">{date.day}</p>
-                    <p className="text-xs text-slate-500">{date.month}</p>
+                    <p className="text-2xl font-bold text-gray-900">{date.day}</p>
+                    <p className="text-xs text-gray-600">{date.month}</p>
                   </div>
 
                   {/* Divider */}
-                  <div className="w-px h-12 bg-slate-800" />
+                  <div className="w-px h-12 bg-gray-300" />
 
                   {/* Details */}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-white truncate">
+                    <p className="font-medium text-gray-900 truncate">
                       {record.class_name || 'Class Session'}
                     </p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-gray-600">
                       {date.weekday}
                       {record.class_code && ` • ${record.class_code}`}
                     </p>
                     {record.remarks && (
-                      <p className="text-xs text-slate-500 mt-1 truncate">{record.remarks}</p>
+                      <p className="text-xs text-gray-600 mt-1 truncate">{record.remarks}</p>
                     )}
                   </div>
 

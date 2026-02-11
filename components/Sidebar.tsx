@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { useState } from 'react';
 
 const navigation = [
   {
@@ -55,57 +56,141 @@ const navigation = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { student } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-slate-950 border-r border-slate-800">
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-6 border-b border-slate-800">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center">
-          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
+    <>
+      {/* Mobile Hamburger Menu - Visible only on small screens */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between h-16">
+        <h1 className="text-lg font-bold text-gray-900">SAMS</h1>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="p-2 text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          {isOpen ? (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Navigation Drawer */}
+      {isOpen && (
+        <div className="md:hidden fixed inset-0 z-30 bg-black bg-opacity-50" onClick={() => setIsOpen(false)} />
+      )}
+
+      <div
+        className={`fixed left-0 z-30 h-screen w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 md:hidden ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {/* Logo Section */}
+        <div className="flex items-center gap-3 px-6 py-6 border-b border-gray-200 mt-16">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-gray-900">SAMS</h1>
+            <p className="text-xs text-gray-500">Student Portal</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-lg font-bold text-white">SAMS</h1>
-          <p className="text-xs text-slate-500">Student Portal</p>
+
+        {/* Navigation */}
+        <nav className="px-4 py-6 space-y-2">
+          {navigation.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className={`
+                  flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
+                  ${isActive
+                    ? 'bg-blue-100 text-blue-600 font-semibold border border-blue-200'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }
+                `}
+              >
+                {item.icon}
+                <span className="font-medium">{item.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* User Info */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold">
+              {student?.name?.charAt(0) || 'S'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">{student?.name || 'Student'}</p>
+              <p className="text-xs text-gray-500 truncate">{student?.studentId || ''}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="px-4 py-6 space-y-2">
-        {navigation.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`
-                flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
-                ${isActive
-                  ? 'bg-gradient-to-r from-violet-500/20 to-purple-500/20 text-violet-400 border border-violet-500/30'
-                  : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
-                }
-              `}
-            >
-              {item.icon}
-              <span className="font-medium">{item.name}</span>
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* User Info */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-800">
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900/50">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold">
-            {student?.name?.charAt(0) || 'S'}
+      {/* Desktop Sidebar - Hidden on small screens */}
+      <aside className="hidden md:flex fixed left-0 top-0 z-40 h-screen w-64 bg-white border-r border-gray-200 flex-col">
+        {/* Logo */}
+        <div className="flex items-center gap-3 px-6 py-6 border-b border-gray-200">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{student?.name || 'Student'}</p>
-            <p className="text-xs text-slate-500 truncate">{student?.studentId || ''}</p>
+          <div>
+            <h1 className="text-lg font-bold text-gray-900">SAMS</h1>
+            <p className="text-xs text-gray-500">Student Portal</p>
           </div>
         </div>
-      </div>
-    </aside>
+
+        {/* Navigation */}
+        <nav className="px-4 py-6 space-y-2 flex-1">
+          {navigation.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`
+                  flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200
+                  ${isActive
+                    ? 'bg-blue-100 text-blue-600 font-semibold border border-blue-200'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }
+                `}
+              >
+                {item.icon}
+                <span className="font-medium">{item.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* User Info */}
+        <div className="p-4 border-t border-gray-200">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold">
+              {student?.name?.charAt(0) || 'S'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">{student?.name || 'Student'}</p>
+              <p className="text-xs text-gray-500 truncate">{student?.studentId || ''}</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }

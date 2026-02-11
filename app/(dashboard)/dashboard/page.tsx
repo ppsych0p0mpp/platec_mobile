@@ -77,10 +77,10 @@ export default function DashboardPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'present': return 'text-emerald-400 bg-emerald-500/10';
-      case 'absent': return 'text-red-400 bg-red-500/10';
-      case 'late': return 'text-amber-400 bg-amber-500/10';
-      default: return 'text-slate-400 bg-slate-500/10';
+      case 'present': return 'text-emerald-600 bg-emerald-100';
+      case 'absent': return 'text-red-600 bg-red-100';
+      case 'late': return 'text-amber-600 bg-amber-100';
+      default: return 'text-gray-600 bg-gray-100';
     }
   };
 
@@ -105,15 +105,15 @@ export default function DashboardPage() {
 
       <div className="px-5 space-y-6 pb-6">
         {/* Attendance Rate Card */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 to-indigo-700 p-6 animate-fade-in">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 to-blue-700 p-6 animate-fade-in">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
           
           <div className="relative">
-            <p className="text-violet-200 text-sm font-medium mb-1">Overall Attendance</p>
+            <p className="text-blue-100 text-sm font-medium mb-1">Overall Attendance</p>
             <div className="flex items-end gap-2 mb-4">
               <span className="text-5xl font-bold text-white">{attendanceRate}</span>
-              <span className="text-2xl text-violet-200 mb-1">%</span>
+              <span className="text-2xl text-blue-100 mb-1">%</span>
             </div>
             
             {/* Progress bar */}
@@ -124,7 +124,7 @@ export default function DashboardPage() {
               />
             </div>
             
-            <p className="text-violet-200 text-sm mt-3">
+            <p className="text-blue-100 text-sm mt-3">
               {data?.stats.present || 0} present out of {data?.stats.total || 0} classes
             </p>
           </div>
@@ -133,39 +133,39 @@ export default function DashboardPage() {
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-3 animate-fade-in stagger-1">
           <div className="stat-present rounded-2xl p-4 text-center">
-            <p className="text-2xl font-bold text-emerald-400">{data?.stats.present || 0}</p>
-            <p className="text-xs text-slate-400 mt-1">Present</p>
+            <p className="text-2xl font-bold text-emerald-600">{data?.stats.present || 0}</p>
+            <p className="text-xs text-gray-600 mt-1">Present</p>
           </div>
           <div className="stat-absent rounded-2xl p-4 text-center">
-            <p className="text-2xl font-bold text-red-400">{data?.stats.absent || 0}</p>
-            <p className="text-xs text-slate-400 mt-1">Absent</p>
+            <p className="text-2xl font-bold text-red-600">{data?.stats.absent || 0}</p>
+            <p className="text-xs text-gray-600 mt-1">Absent</p>
           </div>
           <div className="stat-late rounded-2xl p-4 text-center">
-            <p className="text-2xl font-bold text-amber-400">{data?.stats.late || 0}</p>
-            <p className="text-xs text-slate-400 mt-1">Late</p>
+            <p className="text-2xl font-bold text-amber-600">{data?.stats.late || 0}</p>
+            <p className="text-xs text-gray-600 mt-1">Late</p>
           </div>
         </div>
 
         {/* My Classes */}
         {data?.myClasses && data.myClasses.length > 0 && (
           <div className="animate-fade-in stagger-2">
-            <h2 className="text-lg font-semibold text-white mb-3">My Classes</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">My Classes</h2>
             <div className="space-y-3">
               {data.myClasses.slice(0, 3).map((cls) => (
                 <div
                   key={cls.id}
-                  className="flex items-center gap-4 p-4 rounded-2xl bg-slate-900/60 border border-slate-800/50"
+                  className="flex items-center gap-4 p-4 rounded-2xl bg-gray-100 border border-gray-200"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center flex-shrink-0">
                     <span className="text-white font-bold text-lg">{cls.name.charAt(0)}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-white truncate">{cls.name}</p>
-                    <p className="text-sm text-slate-400 truncate">
+                    <p className="font-medium text-gray-900 truncate">{cls.name}</p>
+                    <p className="text-sm text-gray-600 truncate">
                       {cls.subject || cls.schedule || `Code: ${cls.code}`}
                     </p>
                   </div>
-                  <code className="text-xs text-violet-400 bg-violet-500/10 px-2 py-1 rounded-lg flex-shrink-0">
+                  <code className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-lg flex-shrink-0">
                     {cls.code}
                   </code>
                 </div>
@@ -176,14 +176,14 @@ export default function DashboardPage() {
 
         {/* Recent Attendance */}
         <div className="animate-fade-in stagger-3">
-          <h2 className="text-lg font-semibold text-white mb-3">Recent Attendance</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-3">Recent Attendance</h2>
           
           {data?.recentAttendance && data.recentAttendance.length > 0 ? (
             <div className="space-y-2">
               {data.recentAttendance.map((record) => (
                 <div
                   key={record.id}
-                  className="flex items-center justify-between p-4 rounded-2xl bg-slate-900/60 border border-slate-800/50"
+                  className="flex items-center justify-between p-4 rounded-2xl bg-gray-100 border border-gray-200"
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${getStatusColor(record.status)}`}>
@@ -204,10 +204,10 @@ export default function DashboardPage() {
                       )}
                     </div>
                     <div>
-                      <p className="font-medium text-white text-sm">
+                      <p className="font-medium text-gray-900 text-sm">
                         {record.class_name || 'Class'}
                       </p>
-                      <p className="text-xs text-slate-500">{formatDate(record.date)}</p>
+                      <p className="text-xs text-gray-600">{formatDate(record.date)}</p>
                     </div>
                   </div>
                   <span className={`text-xs font-medium px-3 py-1.5 rounded-full capitalize ${getStatusColor(record.status)}`}>
@@ -217,25 +217,25 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 rounded-2xl bg-slate-900/40 border border-slate-800/50">
-              <svg className="w-12 h-12 mx-auto text-slate-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="text-center py-8 rounded-2xl bg-gray-100 border border-gray-200">
+              <svg className="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              <p className="text-slate-500 text-sm">No attendance records yet</p>
+              <p className="text-gray-600 text-sm">No attendance records yet</p>
             </div>
           )}
         </div>
 
         {/* Student Info */}
         {student && (
-          <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-800/50 animate-fade-in stagger-4">
+          <div className="p-4 rounded-2xl bg-gray-100 border border-gray-200 animate-fade-in stagger-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
                 <span className="text-white font-bold text-lg">{student.name.charAt(0)}</span>
               </div>
               <div>
-                <p className="font-medium text-white">{student.name}</p>
-                <p className="text-sm text-slate-400">
+                <p className="font-medium text-gray-900">{student.name}</p>
+                <p className="text-sm text-gray-600">
                   {student.course} • Year {student.year} - {student.section}
                 </p>
               </div>

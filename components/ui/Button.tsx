@@ -26,13 +26,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants = {
       primary:
-        'bg-gradient-to-r from-violet-500 to-purple-600 text-white hover:from-violet-600 hover:to-purple-700 focus:ring-violet-500 shadow-lg shadow-violet-500/25',
+        'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-lg shadow-blue-600/25',
       secondary:
-        'bg-slate-800 text-slate-100 hover:bg-slate-700 focus:ring-slate-500 border border-slate-700',
+        'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500 border border-gray-300',
       danger:
         'bg-gradient-to-r from-rose-500 to-red-600 text-white hover:from-rose-600 hover:to-red-700 focus:ring-rose-500 shadow-lg shadow-rose-500/25',
       ghost:
-        'bg-transparent text-slate-300 hover:bg-slate-800 hover:text-white focus:ring-slate-500',
+        'bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus:ring-gray-400',
     };
 
     const sizes = {

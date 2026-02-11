@@ -12,8 +12,8 @@ export default function Card({
   ...props
 }: CardProps) {
   const variants = {
-    default: 'bg-slate-900/50 border border-slate-800',
-    gradient: 'bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700',
+    default: 'bg-white border border-gray-200',
+    gradient: 'bg-gradient-to-br from-white to-gray-50 border border-gray-200',
   };
 
   return (
@@ -43,7 +43,7 @@ export function CardTitle({
   children: ReactNode;
   className?: string;
 }) {
-  return <h3 className={`text-xl font-bold text-white ${className}`}>{children}</h3>;
+  return <h3 className={`text-xl font-bold text-gray-900 ${className}`}>{children}</h3>;
 }
 
 export function CardContent({

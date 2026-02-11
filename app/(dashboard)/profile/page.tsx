@@ -72,19 +72,19 @@ export default function ProfilePage() {
 
       <div className="px-5 space-y-6 pb-6">
         {/* Profile Card */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 to-indigo-700 p-6 animate-fade-in">
-          <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 to-blue-700 p-6 animate-fade-in">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-white/20 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
           
           <div className="relative flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center border-4 border-white/30">
+            <div className="w-20 h-20 rounded-full bg-white/30 flex items-center justify-center border-4 border-white/40">
               <span className="text-3xl font-bold text-white">
                 {student.name.charAt(0)}
               </span>
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white">{student.name}</h2>
-              <p className="text-violet-200 text-sm mt-1">{student.course} Student</p>
+              <p className="text-blue-100 text-sm mt-1">{student.course} Student</p>
             </div>
           </div>
         </div>
@@ -94,15 +94,15 @@ export default function ProfilePage() {
           {profileItems.map((item, index) => (
             <div
               key={item.label}
-              className="flex items-center gap-4 p-4 rounded-2xl bg-slate-900/60 border border-slate-800/50"
+              className="flex items-center gap-4 p-4 rounded-2xl bg-gray-100 border border-gray-200"
               style={{ animationDelay: `${index * 0.05}s` }}
             >
-              <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400">
+              <div className="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center text-gray-600">
                 {item.icon}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-500 uppercase tracking-wide">{item.label}</p>
-                <p className="text-white font-medium truncate">{item.value}</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wide">{item.label}</p>
+                <p className="text-gray-900 font-medium truncate">{item.value}</p>
               </div>
             </div>
           ))}
@@ -112,7 +112,7 @@ export default function ProfilePage() {
         <div className="space-y-3 animate-fade-in stagger-2">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 font-medium active:scale-[0.98] transition-transform"
+            className="w-full flex items-center justify-center gap-3 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-600 font-medium active:scale-[0.98] transition-transform"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -123,10 +123,10 @@ export default function ProfilePage() {
 
         {/* App Info */}
         <div className="text-center pt-4 animate-fade-in stagger-3">
-          <p className="text-slate-600 text-xs">
+          <p className="text-gray-600 text-xs">
             Student Attendance Management System
           </p>
-          <p className="text-slate-700 text-xs mt-1">Version 1.0.0</p>
+          <p className="text-gray-500 text-xs mt-1">Version 1.0.0</p>
         </div>
       </div>
     </div>

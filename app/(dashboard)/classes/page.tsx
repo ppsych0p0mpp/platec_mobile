@@ -107,25 +107,25 @@ export default function ClassesPage() {
             {classes.map((cls, index) => (
               <div
                 key={cls.id}
-                className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/50 animate-fade-in"
+                className="p-5 rounded-2xl bg-gray-100 border border-gray-200 animate-fade-in"
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center flex-shrink-0">
                     <span className="text-white font-bold text-xl">{cls.name.charAt(0)}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold text-white text-lg truncate">{cls.name}</h3>
-                      <code className="text-xs text-violet-400 bg-violet-500/10 px-2 py-1 rounded-lg flex-shrink-0">
+                      <h3 className="font-semibold text-gray-900 text-lg truncate">{cls.name}</h3>
+                      <code className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-lg flex-shrink-0">
                         {cls.code}
                       </code>
                     </div>
                     {cls.subject && (
-                      <p className="text-slate-400 text-sm mt-1">{cls.subject}</p>
+                      <p className="text-gray-600 text-sm mt-1">{cls.subject}</p>
                     )}
                     {cls.schedule && (
-                      <div className="flex items-center gap-2 mt-2 text-slate-500 text-sm">
+                      <div className="flex items-center gap-2 mt-2 text-gray-600 text-sm">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
@@ -133,7 +133,7 @@ export default function ClassesPage() {
                       </div>
                     )}
                     {cls.description && (
-                      <p className="text-slate-500 text-sm mt-2 line-clamp-2">{cls.description}</p>
+                      <p className="text-gray-600 text-sm mt-2 line-clamp-2">{cls.description}</p>
                     )}
                   </div>
                 </div>
@@ -142,13 +142,13 @@ export default function ClassesPage() {
           </div>
         ) : (
           <div className="text-center py-16 animate-fade-in">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-slate-900/60 flex items-center justify-center">
-              <svg className="w-10 h-10 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+              <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-white mb-2">No classes yet</h3>
-            <p className="text-slate-500 text-sm mb-6">Join a class using the code from your teacher</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No classes yet</h3>
+            <p className="text-gray-600 text-sm mb-6">Join a class using the code from your teacher</p>
           </div>
         )}
       </div>
@@ -160,23 +160,23 @@ export default function ClassesPage() {
           onClick={() => { setShowJoinModal(false); setJoinCode(''); setError(''); }}
         >
           <div 
-            className="w-full max-w-md bg-slate-900 rounded-3xl p-6 animate-scale-in"
+            className="w-full max-w-md bg-white rounded-3xl p-6 animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-white text-center mb-2">Join a Class</h2>
-            <p className="text-slate-400 text-center text-sm mb-6">
+            <h2 className="text-xl font-bold text-gray-900 text-center mb-2">Join a Class</h2>
+            <p className="text-gray-600 text-center text-sm mb-6">
               Enter the class code provided by your teacher
             </p>
 
             {error && (
-              <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 mb-4 animate-scale-in">
-                <p className="text-red-400 text-sm text-center">{error}</p>
+              <div className="p-4 rounded-2xl bg-red-50 border border-red-200 mb-4 animate-scale-in">
+                <p className="text-red-600 text-sm text-center">{error}</p>
               </div>
             )}
 
             {success && (
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 mb-4 animate-scale-in">
-                <p className="text-emerald-400 text-sm text-center">{success}</p>
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 mb-4 animate-scale-in">
+                <p className="text-emerald-600 text-sm text-center">{success}</p>
               </div>
             )}
 
@@ -186,7 +186,7 @@ export default function ClassesPage() {
               onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
               placeholder="Enter class code"
               maxLength={10}
-              className="w-full px-4 py-4 rounded-2xl bg-slate-800 border border-slate-700 text-white text-center text-2xl tracking-widest font-mono placeholder-slate-600 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all uppercase"
+              className="w-full px-4 py-4 rounded-2xl bg-gray-50 border border-gray-300 text-gray-900 text-center text-2xl tracking-widest font-mono placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all uppercase"
               autoFocus
             />
 
@@ -197,14 +197,14 @@ export default function ClassesPage() {
                   setJoinCode('');
                   setError('');
                 }}
-                className="flex-1 py-4 rounded-2xl bg-slate-800 text-slate-300 font-medium active:scale-[0.98] transition-transform"
+                className="flex-1 py-4 rounded-2xl bg-gray-200 text-gray-700 font-medium active:scale-[0.98] transition-transform"
               >
                 Cancel
               </button>
               <button
                 onClick={handleJoinClass}
                 disabled={!joinCode.trim() || isJoining}
-                className="flex-1 py-4 rounded-2xl bg-violet-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-transform"
+                className="flex-1 py-4 rounded-2xl bg-blue-600 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-transform"
               >
                 {isJoining ? (
                   <span className="flex items-center justify-center gap-2">

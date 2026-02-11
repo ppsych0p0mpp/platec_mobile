@@ -55,24 +55,24 @@ export default function NotificationsPage() {
     switch (type) {
       case 'absence':
         return {
-          bg: 'bg-red-500/10',
-          border: 'border-red-500/20',
-          icon: 'text-red-400',
-          iconBg: 'bg-red-500/20',
+          bg: 'bg-red-50',
+          border: 'border-red-200',
+          icon: 'text-red-600',
+          iconBg: 'bg-red-100',
         };
       case 'late':
         return {
-          bg: 'bg-amber-500/10',
-          border: 'border-amber-500/20',
-          icon: 'text-amber-400',
-          iconBg: 'bg-amber-500/20',
+          bg: 'bg-amber-50',
+          border: 'border-amber-200',
+          icon: 'text-amber-600',
+          iconBg: 'bg-amber-100',
         };
       default:
         return {
-          bg: 'bg-violet-500/10',
-          border: 'border-violet-500/20',
-          icon: 'text-violet-400',
-          iconBg: 'bg-violet-500/20',
+          bg: 'bg-blue-50',
+          border: 'border-blue-200',
+          icon: 'text-blue-600',
+          iconBg: 'bg-blue-100',
         };
     }
   };
@@ -123,7 +123,7 @@ export default function NotificationsPage() {
         {/* Unread badge */}
         {unreadCount > 0 && (
           <div className="flex items-center gap-2 animate-fade-in">
-            <span className="px-3 py-1.5 rounded-full bg-violet-500/10 text-violet-400 text-sm font-medium">
+            <span className="px-3 py-1.5 rounded-full bg-blue-100 text-blue-600 text-sm font-medium">
               {unreadCount} unread
             </span>
           </div>
@@ -141,36 +141,36 @@ export default function NotificationsPage() {
                   onClick={() => !notification.read && handleMarkAsRead(notification._id)}
                   className={`w-full text-left p-4 rounded-2xl transition-all touch-feedback animate-fade-in ${
                     notification.read
-                      ? 'bg-slate-900/40 border border-slate-800/50'
+                      ? 'bg-gray-100 border border-gray-200'
                       : `${styles.bg} border ${styles.border}`
                   }`}
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
                   <div className="flex gap-4">
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                      notification.read ? 'bg-slate-800' : styles.iconBg
+                      notification.read ? 'bg-gray-200' : styles.iconBg
                     }`}>
-                      <span className={notification.read ? 'text-slate-500' : styles.icon}>
+                      <span className={notification.read ? 'text-gray-500' : styles.icon}>
                         {getIcon(notification.type)}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className={`font-medium truncate ${
-                          notification.read ? 'text-slate-400' : 'text-white'
+                          notification.read ? 'text-gray-600' : 'text-gray-900'
                         }`}>
                           {notification.title}
                         </h3>
                         {!notification.read && (
-                          <span className="w-2 h-2 rounded-full bg-violet-500 flex-shrink-0 mt-2" />
+                          <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0 mt-2" />
                         )}
                       </div>
                       <p className={`text-sm mt-1 line-clamp-2 ${
-                        notification.read ? 'text-slate-500' : 'text-slate-400'
+                        notification.read ? 'text-gray-500' : 'text-gray-600'
                       }`}>
                         {notification.message}
                       </p>
-                      <p className="text-xs text-slate-600 mt-2">
+                      <p className="text-xs text-gray-500 mt-2">
                         {formatTime(notification.createdAt)}
                       </p>
                     </div>
@@ -181,13 +181,13 @@ export default function NotificationsPage() {
           </div>
         ) : (
           <div className="text-center py-16 animate-fade-in">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-slate-900/60 flex items-center justify-center">
-              <svg className="w-10 h-10 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+              <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-white mb-2">All caught up!</h3>
-            <p className="text-slate-500 text-sm">You have no notifications</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">All caught up!</h3>
+            <p className="text-gray-600 text-sm">You have no notifications</p>
           </div>
         )}
       </div>

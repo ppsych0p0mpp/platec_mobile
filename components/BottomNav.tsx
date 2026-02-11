@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 
 const navItems = [
   {
@@ -53,37 +54,66 @@ const navItems = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800">
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`relative flex flex-col items-center justify-center w-full h-full transition-all duration-200 ${
-                isActive
-                  ? 'text-violet-400'
-                  : 'text-slate-500 active:text-slate-300'
-              }`}
-            >
-              <div className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
-                {item.icon}
-              </div>
-              <span className={`text-[10px] mt-1 font-medium ${isActive ? 'text-violet-400' : ''}`}>
-                {item.label}
-              </span>
-              {isActive && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-violet-500 rounded-full" />
-              )}
-            </Link>
-          );
-        })}
-      </div>
-      {/* Safe area spacer for iOS home indicator */}
-      <div className="h-[env(safe-area-inset-bottom)]" />
-    </nav>
+    <>
+      {/* Mobile Bottom Navigation - Hidden on md and up */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 md:hidden">
+        <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`relative flex flex-col items-center justify-center w-full h-full transition-all duration-200 ${
+                  isActive
+                    ? 'text-blue-600'
+                    : 'text-gray-600 active:text-gray-800'
+                }`}
+              >
+                <div className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
+                  {item.icon}
+                </div>
+                <span className={`text-[10px] mt-1 font-medium ${isActive ? 'text-blue-600' : ''}`}>
+                  {item.label}
+                </span>
+                {isActive && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-blue-600 rounded-full" />
+                )}
+              </Link>
+            );
+          })}
+        </div>
+        {/* Safe area spacer for iOS home indicator */}
+        <div className="h-[env(safe-area-inset-bottom)]" />
+      </nav>
+
+      {/* Desktop Top Navigation - Visible only on md and up */}
+      <nav className="hidden md:flex fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
+        <div className="w-full flex items-center justify-center h-16 px-6">
+          <div className="flex items-center justify-center gap-8 max-w-4xl mx-auto">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                    isActive
+                      ? 'bg-blue-100 text-blue-600 font-semibold'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <div className="w-5 h-5">{item.icon}</div>
+                  <span className="text-sm">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
+    </>
   );
 }
